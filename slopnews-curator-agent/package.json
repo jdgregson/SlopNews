@@ -1,0 +1,19 @@
+{
+  "name": "slopnews-curator-agent",
+  "version": "1.0.0",
+  "description": "SlopNews Curator Agent selects the next headline",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@cloudflare/ai": "^1.2.2",
+    "@cloudflare/workers-types": "^4.20240208.0",
+    "base64-js": "^1.5.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0"
+  }
+}

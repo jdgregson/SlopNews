@@ -1,0 +1,15 @@
+# Main story curation worker
+name = "slopnews-curator-agent"
+main = "src/index.ts"
+compatibility_date = "2024-02-20"
+
+[[d1_databases]]
+binding = "slopnews_db"
+database_name = "slopnews_db"
+database_id = "14a69182-cb40-4f74-9985-c0ee6c8d8eb1"
+
+[ai]
+binding = "AI"
+
+[triggers]
+crons = ["0 * * * *"]
