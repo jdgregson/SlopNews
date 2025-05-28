@@ -1,6 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
-import { Ai } from '@cloudflare/ai';
-import { systemPrompts } from '../../slopnews-news-agent/src/system-prompts';
+import {Ai} from '@cloudflare/ai';
+import {systemPrompts} from '../../slopnews-news-agent/src/system-prompts';
+
+const HEADLINE_MODEL = '@cf/mistral/mistral-7b-instruct-v0.1';
 
 interface Env {
   AI: any;
@@ -31,9 +33,14 @@ interface NewsResponse {
 }
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(
+    request: Request,
+    env: Env,
+    ctx: ExecutionContext
+  ): Promise<Response> {
     try {
-      const getAIText = (resp: any) => (resp?.result?.response ?? resp?.response ?? '').toString().trim();
+      const getAIText = (resp: any) =>
+        (resp?.result?.response ?? resp?.response ?? '').toString().trim();
 
       // Get stories from our database
       const stories = await env.slopnews_db
@@ -57,36 +64,49 @@ export default {
       }
 
       const headlines = newsTitles.join('\n - ');
-      const storyTitles = stories.results.map((story: any) => story.title).join('\n - ');
+      const storyTitles = stories.results
+        .map((story: any) => story.title)
+        .join('\n - ');
       const formattedPrompt = `Current headlines:\n${headlines}`;
 
       const ai = new Ai(env.AI);
-      const headlineResponse = await ai.run('@cf/meta/llama-4-scout-17b-16e-instruct' as any, {
-        messages: [
-          { role: 'system', content: systemPrompts.curator },
-          { role: 'user', content: formattedPrompt }
-        ],
-        max_tokens: 2000
-      });
+      const headlineResponse = await ai.run(
+        HEADLINE_MODEL as any,
+        {
+          messages: [
+            {role: 'system', content: systemPrompts.curator},
+            {role: 'user', content: formattedPrompt},
+          ],
+          max_tokens: 2000,
+        }
+      );
       const headlineOutput = getAIText(headlineResponse);
 
-      const requestUrl = `${env.SLOPNEWS_NEWS_AGENT_URL}/?key=${env.SLOPNEWS_NEWS_AGENT_KEY}&headline=${headlineOutput}`
+      const requestUrl = `${env.SLOPNEWS_NEWS_AGENT_URL}/?key=${env.SLOPNEWS_NEWS_AGENT_KEY}&headline=${headlineOutput}`;
       const newsAgentResponse = await fetch(requestUrl, {
         method: 'GET',
       });
 
       return new Response(newsAgentResponse as any, {
-        headers: { 'Content-Type': 'text/plain' },
+        headers: {'Content-Type': 'text/plain'},
       });
     } catch (error: any) {
-      return new Response(JSON.stringify({
-        error: 'Internal server error',
-        details: error.message,
-        stack: error.stack
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error: 'Internal server error',
+          details: error.message,
+          stack: error.stack,
+        }),
+        {
+          status: 500,
+          headers: {'Content-Type': 'application/json'},
+        }
+      );
     }
   },
+
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    // Reuse the fetch logic for the cron job
+    await this.fetch(new Request('http://localhost'), env, ctx);
+  }
 };

@@ -1,4 +1,10 @@
-import { HEADER_HTML, FOOTER_HTML, SHARED_STYLES, SHARED_SCRIPTS, ORGANIZATION_SCHEMA } from './components.js';
+import {
+  HEADER_HTML,
+  FOOTER_HTML,
+  SHARED_STYLES,
+  SHARED_SCRIPTS,
+  ORGANIZATION_SCHEMA,
+} from './components.js';
 
 export const STORY_HTML = `<!DOCTYPE html>
 <html lang="en">
@@ -217,7 +223,7 @@ export const STORY_HTML = `<!DOCTYPE html>
                         "name": "SLOP News 24/7",
                         "logo": {
                             "@type": "ImageObject",
-                            "url": "https://SLOP News 24/7.com/logo.png"
+                            "url": "https://slop247.com/logo.png"
                         }
                     },
                     "description": snippet(story.content, 160),
