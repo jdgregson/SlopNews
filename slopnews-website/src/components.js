@@ -106,6 +106,7 @@ export const SHARED_STYLES = `
         padding: 0;
         background: #fff;
         color: #333;
+        overflow-x: hidden;
     }
     header {
         border-bottom: 2px solid #000;
@@ -218,7 +219,7 @@ export const SHARED_STYLES = `
         .category-selector {
             width: 100%;
             justify-content: space-between;
-            padding: 0 1.5rem;
+            padding: 0;
             margin-top: 30px;
             background-color: #e7e7e7;
         }
@@ -246,7 +247,7 @@ export const SHARED_STYLES = `
         nav a {
             width: 100%;
             text-align: center;
-            padding: 0.75rem;
+            padding: 0.75rem 0;
             border-bottom: 1px solid #eee;
         }
         nav a:last-child {

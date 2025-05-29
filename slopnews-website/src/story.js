@@ -71,6 +71,7 @@ export const STORY_HTML = `<!DOCTYPE html>
             margin-top: 2rem;
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
         .share-buttons a {
             display: inline-flex;

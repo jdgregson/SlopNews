@@ -81,37 +81,6 @@ export const UI_HTML = `<!DOCTYPE html>
             margin-top: 1rem;
             font-style: italic;
         }
-        .story .share-buttons {
-            margin-top: 1rem;
-            display: flex;
-            gap: 0.5rem;
-        }
-        .story .share-buttons a {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            color: white;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: opacity 0.2s;
-        }
-        .story .share-buttons a:hover {
-            opacity: 0.9;
-        }
-        .story .share-buttons .twitter {
-            background-color: #1DA1F2;
-        }
-        .story .share-buttons .facebook {
-            background-color: #4267B2;
-        }
-        .story .share-buttons .linkedin {
-            background-color: #0077B5;
-        }
-        .story .share-buttons .email {
-            background-color: #666;
-        }
         .loading {
             text-align: center;
             padding: 2rem;

@@ -85,5 +85,14 @@ export const systemPrompts = {
   Focus on authentic moments, natural lighting, and realistic composition.
   The image should look like it was taken by a professional news photographer using a standard DSLR camera with natural settings.
   Avoid any artistic effects, borders, or post-processing.
+  Return only the prompt, nothing else.
+  Do not provide titles, headings, or any formatting. Return a simple string prompt describing the image to be created.
+  Do not include confirmations, comments, or any other text. Just the prompt for the image generator.
   `,
+  categorizer: `
+  You are a news category classifier.
+  Choose a single, concise category for this news story.
+  Examples: technology, politics, sports, entertainment, business, science, health, world, local.
+  Respond with just the category name, nothing else.
+  `
 };

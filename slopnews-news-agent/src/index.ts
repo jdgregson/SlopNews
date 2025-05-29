@@ -2,11 +2,11 @@
 import {Ai} from '@cloudflare/ai';
 import {systemPrompts} from './system-prompts';
 
-const HEADLINE_MODEL = '@cf/mistral/mistral-7b-instruct-v0.2-lora';
-const CONTENT_MODEL = '@cf/mistral/mistral-7b-instruct-v0.2-lora';
-const EDITOR_MODEL = '@cf/mistral/mistral-7b-instruct-v0.2-lora';
-const CATEGORY_MODEL = '@cf/mistral/mistral-7b-instruct-v0.2-lora';
-const ARTIST_MODEL = '@cf/lykon/dreamshaper-8-lcm';
+const HEADLINE_MODEL = '@cf/meta/llama-4-scout-17b-16e-instruct';
+const CONTENT_MODEL = '@cf/meta/llama-4-scout-17b-16e-instruct';
+const EDITOR_MODEL = '@cf/meta/llama-4-scout-17b-16e-instruct';
+const CATEGORY_MODEL = '@cf/meta/llama-4-scout-17b-16e-instruct';
+const ARTIST_MODEL = '@cf/stabilityai/stable-diffusion-xl-base-1.0';
 
 const APP_DOMAIN = 'https://slop247.com';
 const APP_IMAGES_DOMAIN = 'https://image.slop247.com';
@@ -64,7 +64,7 @@ export default {
       const title = getAIText(titleResponse);
 
       // Generate a story
-      const contentResponse = await ai.run(CONTENT_MODEL, {
+      const contentResponse = await ai.run(CONTENT_MODEL as any, {
         messages: [
           {role: 'system', content: systemPrompts.writer},
           {
@@ -111,12 +111,11 @@ export default {
       }
 
       // Generate category
-      const categoryResponse = await ai.run(CATEGORY_MODEL, {
+      const categoryResponse = await ai.run(CATEGORY_MODEL as any, {
         messages: [
           {
             role: 'system',
-            content:
-              'You are a news category classifier. Choose a single, concise category for this news story. Examples: technology, politics, sports, entertainment, business, science, health, world, local. Respond with just the category name, nothing else.',
+            content: systemPrompts.categorizer,
           },
           {
             role: 'user',
@@ -127,35 +126,49 @@ export default {
       const category = getAIText(categoryResponse).toLowerCase();
 
       // Generate image prompt
-      const imagePromptResponse = await ai.run(ARTIST_MODEL as any, {
-        messages: [
-          {role: 'system', content: systemPrompts.artist},
-          {
-            role: 'user',
-            content: `Generate an image prompt for this news story:\nTitle: ${title}\nContent: ${content}`,
+      let imageUrl = `${APP_IMAGES_DOMAIN}/default.png`;
+      let imagePrompt = '';
+      try {
+        const imagePromptResponse = await ai.run(CONTENT_MODEL as any, {
+          messages: [
+            {role: 'system', content: systemPrompts.artist},
+            {
+              role: 'user',
+              content: `Generate an image prompt for this news story:\nTitle: ${title}\nContent: ${content}`,
+            },
+          ],
+        });
+        imagePrompt = getAIText(imagePromptResponse);
+        console.log('Generated image prompt:', imagePrompt);
+
+        // Generate image
+        const imageResponse = await ai.run(ARTIST_MODEL, {
+          prompt: imagePrompt,
+          num_steps: 20,
+          width: 800,
+          height: 800,
+        } as any);
+        console.log(
+          'Generated image response:',
+          imageResponse ? 'Success' : 'Failed'
+        );
+
+        // Store image in R2
+        const imageId = crypto.randomUUID();
+        const originalKey = `${imageId}.png`;
+        await env.IMAGES.put(originalKey, imageResponse, {
+          httpMetadata: {
+            contentType: 'image/png',
           },
-        ],
-      });
-      const imagePrompt = getAIText(imagePromptResponse);
+        });
+        console.log('Stored image in R2:', originalKey);
 
-      // Generate image
-      const imageResponse = await ai.run(ARTIST_MODEL, {
-        prompt: imagePrompt,
-        num_steps: 20,
-        width: 800,
-        height: 800,
-      } as any);
-
-      // Store image in R2
-      const imageId = crypto.randomUUID();
-      const originalKey = `${imageId}.png`;
-      await env.IMAGES.put(originalKey, imageResponse, {
-        httpMetadata: {
-          contentType: 'image/png',
-        },
-      });
-
-      const imageUrl = `${APP_IMAGES_DOMAIN}/${originalKey}`;
+        imageUrl = `${APP_IMAGES_DOMAIN}/${originalKey}`;
+      } catch (error) {
+        console.error('Error in image generation:', error);
+        // Fallback to a default image URL if image generation fails
+        imageUrl = `${APP_IMAGES_DOMAIN}/default.png`;
+      }
 
       // Create story object
       const story = {

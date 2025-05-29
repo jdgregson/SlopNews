@@ -157,7 +157,7 @@ router.get('/api/stories/:id/related', async (request, env) => {
 
     // Then get 3 other stories from the same category
     const relatedStories = await env.DB.prepare(
-      'SELECT * FROM stories WHERE category = ? AND id != ? ORDER BY days_ago ASC LIMIT ?'
+      'SELECT * FROM stories WHERE category = ? AND id != ? ORDER BY id DESC LIMIT ?'
     )
       .bind(currentStory.category, id, limit)
       .all();

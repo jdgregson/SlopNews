@@ -9,6 +9,7 @@ SLOP News 24/7 is an imaginary news organization set in a dystopian near future.
 ## Where is it?
 
 Website: [slop247.com](https://slop247.com)
+
 API: [slop247.com/api/stories](https://slop247.com/api/stories)
 
 

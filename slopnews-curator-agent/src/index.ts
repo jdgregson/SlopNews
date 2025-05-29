@@ -2,7 +2,7 @@
 import {Ai} from '@cloudflare/ai';
 import {systemPrompts} from '../../slopnews-news-agent/src/system-prompts';
 
-const HEADLINE_MODEL = '@cf/mistral/mistral-7b-instruct-v0.1';
+const HEADLINE_MODEL = '@cf/meta/llama-4-scout-17b-16e-instruct';
 
 interface Env {
   AI: any;
@@ -87,8 +87,22 @@ export default {
         method: 'GET',
       });
 
-      return new Response(newsAgentResponse as any, {
-        headers: {'Content-Type': 'text/plain'},
+      if (!newsAgentResponse.ok) {
+        throw new Error(`News agent responded with status ${newsAgentResponse.status}: ${await newsAgentResponse.text()}`);
+      }
+
+      const newsAgentData = await newsAgentResponse.json();
+
+      if (!newsAgentData || Object.keys(newsAgentData).length === 0) {
+        throw new Error('News agent returned empty response');
+      }
+
+      return new Response(JSON.stringify({
+        status: 'success',
+        headline: headlineOutput,
+        news_agent_response: newsAgentData
+      }), {
+        headers: {'Content-Type': 'application/json'},
       });
     } catch (error: any) {
       return new Response(
