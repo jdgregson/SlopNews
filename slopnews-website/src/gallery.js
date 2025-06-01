@@ -81,6 +81,32 @@ export const GALLERY_HTML = `<!DOCTYPE html>
             background: white;
             overflow-y: auto;
         }
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        .modal-nav:hover {
+            background: rgba(0,0,0,0.7);
+        }
+        .modal-nav.prev {
+            left: 20px;
+        }
+        .modal-nav.next {
+            right: 20px;
+        }
         .modal-story h3 {
             margin: 0 0 10px 0;
             font-size: 1.5rem;
@@ -128,6 +154,9 @@ export const GALLERY_HTML = `<!DOCTYPE html>
             .modal-image {
                 max-height: 50vh;
             }
+            .modal-nav {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -140,6 +169,8 @@ export const GALLERY_HTML = `<!DOCTYPE html>
     <div id="modal" class="modal">
         <div class="modal-content">
             <button class="close-modal">&times;</button>
+            <button class="modal-nav prev" id="prev-image">←</button>
+            <button class="modal-nav next" id="next-image">→</button>
             <img id="modal-image" class="modal-image" src="" alt="">
             <div id="modal-story" class="modal-story"></div>
         </div>
@@ -154,6 +185,10 @@ export const GALLERY_HTML = `<!DOCTYPE html>
         let currentBatch = [];
         let currentIndex = 0;
         let isLoadingBatch = false;
+        let currentModalIndex = -1;
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let allLoadedItems = []; // Track all loaded items
 
         async function loadNextBatch() {
             if (loading || !hasMore || isLoadingBatch) return;
@@ -176,6 +211,8 @@ export const GALLERY_HTML = `<!DOCTYPE html>
                 }
 
                 currentBatch = data.images;
+                // Add new items to our complete history
+                allLoadedItems = [...allLoadedItems, ...currentBatch];
                 currentIndex = 0;
                 page++;
                 console.log('Page incremented to:', page);
@@ -239,27 +276,125 @@ export const GALLERY_HTML = `<!DOCTYPE html>
             modalImage.alt = item.title;
 
             modalStory.innerHTML = \`
-                <h3>\${item.title}</h3>
+                <h3><a href="/story/\${item.id}" target="_blank" style="color: inherit; text-decoration: none;">\${item.title}</a></h3>
                 <p>\${item.content.substring(0, 200)}...</p>
                 <a href="/story/\${item.id}" target="_blank">Read full story</a>
             \`;
 
             modal.style.display = 'block';
             document.body.style.overflow = 'hidden';
+
+            // Find the index of the current item in all loaded items
+            currentModalIndex = allLoadedItems.findIndex(i => i.image === item.image);
+
+            // Add keyboard event listener
+            document.addEventListener('keydown', handleKeyPress);
+            // Add touch event listeners
+            modal.addEventListener('touchstart', handleTouchStart);
+            modal.addEventListener('touchmove', handleTouchMove);
+            modal.addEventListener('touchend', handleTouchEnd);
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'ArrowLeft') {
+                showPreviousImage();
+            } else if (e.key === 'ArrowRight') {
+                showNextImage();
+            } else if (e.key === 'Escape') {
+                closeModal();
+            }
+        }
+
+        function handleTouchStart(e) {
+            touchStartX = e.touches[0].clientX;
+        }
+
+        function handleTouchMove(e) {
+            touchEndX = e.touches[0].clientX;
+        }
+
+        function handleTouchEnd() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    showNextImage();
+                } else {
+                    showPreviousImage();
+                }
+            }
+        }
+
+        function showPreviousImage() {
+            if (currentModalIndex > 0) {
+                currentModalIndex--;
+                const item = allLoadedItems[currentModalIndex];
+                if (item) {
+                    updateModalContent(item);
+                }
+            }
+        }
+
+        function showNextImage() {
+            if (currentModalIndex < allLoadedItems.length - 1) {
+                currentModalIndex++;
+                const item = allLoadedItems[currentModalIndex];
+                if (item) {
+                    updateModalContent(item);
+                }
+            } else if (hasMore && !loading) {
+                // If we're at the end and there are more images to load, load them
+                console.log('Reached end of loaded images, loading more...');
+                loadNextBatch().then(() => {
+                    // After loading, move to the next image
+                    if (currentModalIndex < allLoadedItems.length - 1) {
+                        currentModalIndex++;
+                        const item = allLoadedItems[currentModalIndex];
+                        if (item) {
+                            updateModalContent(item);
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateModalContent(item) {
+            const modalImage = document.getElementById('modal-image');
+            const modalStory = document.getElementById('modal-story');
+
+            modalImage.src = item.image;
+            modalImage.alt = item.title;
+
+            modalStory.innerHTML = \`
+                <h3><a href="/story/\${item.id}" target="_blank" style="color: inherit; text-decoration: none;">\${item.title}</a></h3>
+                <p>\${item.content.substring(0, 200)}...</p>
+                <a href="/story/\${item.id}" target="_blank">Read full story</a>
+            \`;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.removeEventListener('keydown', handleKeyPress);
+            modal.removeEventListener('touchstart', handleTouchStart);
+            modal.removeEventListener('touchmove', handleTouchMove);
+            modal.removeEventListener('touchend', handleTouchEnd);
         }
 
         // Close modal when clicking the close button or outside the modal content
-        document.querySelector('.close-modal').onclick = () => {
-            document.getElementById('modal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        };
+        document.querySelector('.close-modal').onclick = closeModal;
 
         document.getElementById('modal').onclick = (e) => {
             if (e.target === document.getElementById('modal')) {
-                document.getElementById('modal').style.display = 'none';
-                document.body.style.overflow = 'auto';
+                closeModal();
             }
         };
+
+        // Add click handlers for navigation buttons
+        document.getElementById('prev-image').onclick = showPreviousImage;
+        document.getElementById('next-image').onclick = showNextImage;
 
         // Initialize infinite scroll
         function initInfiniteScroll() {
