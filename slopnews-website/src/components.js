@@ -11,6 +11,7 @@ export const HEADER_HTML = `
         </div>
         <nav id="category-nav">
             <a href="/" class="nav-link">All Stories</a>
+            <a href="/gallery" class="nav-link">Gallery</a>
         </nav>
         <div class="headlines-marquee">
             <span id="headlines-text"></span>
@@ -30,6 +31,7 @@ export const FOOTER_HTML = `
                 <h4>Features</h4>
                 <ul id="feature-categories">
                     <li><a href="/">All Stories</a></li>
+                    <li><a href="/gallery">Gallery</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -344,9 +346,11 @@ export const SHARED_SCRIPTS = `
         const nav = document.getElementById('category-nav');
         const urlParams = new URLSearchParams(window.location.search);
         const currentCategory = urlParams.get('category');
+        const isGalleryPage = window.location.pathname === '/gallery';
 
-        // Keep the Home link
-        let navHtml = '<a href="/" class="nav-link' + (!currentCategory ? ' active' : '') + '">All Stories</a>';
+        // Keep the Home link and add Gallery
+        let navHtml = '<a href="/" class="nav-link' + (!currentCategory && !isGalleryPage ? ' active' : '') + '">All Stories</a>' +
+                     '<a href="/gallery" class="nav-link' + (isGalleryPage ? ' active' : '') + '">Gallery</a>';
 
         // Add only categories that exist in the database
         categories.forEach(category => {
@@ -359,7 +363,7 @@ export const SHARED_SCRIPTS = `
         // Update current category display
         const categoryDisplay = document.querySelector('.current-category');
         if (categoryDisplay) {
-            categoryDisplay.textContent = currentCategory || 'All Stories';
+            categoryDisplay.textContent = isGalleryPage ? 'Gallery' : (currentCategory || 'All Stories');
         }
 
         // Update footer categories
@@ -374,12 +378,14 @@ export const SHARED_SCRIPTS = `
 
             // Update news categories
             newsCategories.innerHTML = '<li><a href="/">All Stories</a></li>' +
+                                     '<li><a href="/gallery">Gallery</a></li>' +
                 newsSection.map(category =>
                     '<li><a href="/?category=' + encodeURIComponent(category) + '">' + category + '</a></li>'
                 ).join('');
 
             // Update feature categories
             featureCategories.innerHTML = '<li><a href="/">All Stories</a></li>' +
+                                        '<li><a href="/gallery">Gallery</a></li>' +
                 featureSection.map(category =>
                     '<li><a href="/?category=' + encodeURIComponent(category) + '">' + category + '</a></li>'
                 ).join('');

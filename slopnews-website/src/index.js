@@ -2,6 +2,7 @@ import {Router} from 'itty-router';
 import {UI_HTML} from './ui';
 import {STORY_HTML} from './story';
 import {DISCLAIMER_HTML} from './disclaimer';
+import {GALLERY_HTML} from './gallery';
 
 const router = Router();
 
@@ -23,6 +24,13 @@ router.get('/story/:id', async (request, env) => {
 router.get('/disclaimer', async (request, env) => {
   return new Response(DISCLAIMER_HTML, {
     headers: {'Content-Type': 'text/html'},
+  });
+});
+
+// Serve gallery page
+router.get('/gallery', async (request, env) => {
+  return new Response(GALLERY_HTML, {
+    headers: { 'Content-Type': 'text/html' },
   });
 });
 
@@ -170,6 +178,32 @@ router.get('/api/stories/:id/related', async (request, env) => {
     return new Response(JSON.stringify({error: 'Internal server error'}), {
       status: 500,
       headers: {'Content-Type': 'application/json'},
+    });
+  }
+});
+
+// API endpoint to get images for gallery
+router.get('/api/gallery', async (request, env) => {
+  const url = new URL(request.url);
+  const page = parseInt(url.searchParams.get('page')) || 1;
+  const limit = parseInt(url.searchParams.get('limit')) || 20;
+  const offset = (page - 1) * limit;
+
+  try {
+    const stories = await env.DB.prepare(
+      'SELECT id, title, content, image FROM stories WHERE image IS NOT NULL ORDER BY id DESC LIMIT ? OFFSET ?'
+    ).bind(limit, offset).all();
+
+    return new Response(JSON.stringify({
+      images: stories.results
+    }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('Database error:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 });
