@@ -12,6 +12,7 @@ export const STORY_HTML = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Story - SLOP News 24/7</title>
+    <link rel="icon" href="https://image.slop247.com/icon.png">
     <meta name="description" content="Southern Louisiana Operationalized Partition - Your trusted source for news and analysis to get you through the hour">
     <meta name="keywords" content="news, Louisiana, Southern Louisiana, operational news, partition analysis">
     <meta property="og:type" content="article">

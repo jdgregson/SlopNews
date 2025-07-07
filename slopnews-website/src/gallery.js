@@ -11,7 +11,7 @@ export const GALLERY_HTML = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gallery - SLOP News 24/7</title>
-    <link rel="icon" href="https://image.slop247.com/icon.png?23">
+    <link rel="icon" href="https://image.slop247.com/icon.png">
     <meta name="description" content="Browse news images from SLOP News 24/7">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="SLOP News 24/7">
