@@ -423,7 +423,52 @@ export const SHARED_SCRIPTS = `
         } catch (error) {
             console.error('Error loading headlines:', error);
         }
-    }`;
+    }
+    function handleImageError(img) {
+        const colors = [
+            [150, 130, 130],
+            [120, 140, 140],
+            [160, 160, 130],
+            [130, 130, 150],
+            [180, 170, 160],
+            [140, 150, 180],
+            [170, 130, 160],
+            [160, 140, 150],
+            [130, 160, 140],
+        ];
+        const picked = colors.sort(() => 0.5 - Math.random()).slice(0, 4);
+        const circles = picked
+            .map((c, i) => {
+            const cx = Math.random() * 300;
+            const cy = Math.random() * 200;
+            const r = 100 + Math.random() * 50;
+            return \`<radialGradient id="grad\${i}" cx="\${cx}" cy="\${cy}" r="\${r}" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="rgb(\${c.join(
+                        ','
+                    )})" stop-opacity="1"/>
+                    <stop offset="100%" stop-color="rgb(\${c.join(
+                        ','
+                    )})" stop-opacity="0"/>
+                    </radialGradient>
+                    <circle cx="\${cx}" cy="\${cy}" r="\${r}" fill="url(#grad\${i})"/>\`;
+            })
+            .join('');
+
+        const svg = \`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200">
+            <defs>\${circles}</defs>
+            <rect width="300" height="200" fill="#111"/>
+            \${circles}
+        </svg>\`;
+
+        const placeholderImage = 'data:image/svg+xml;base64,' + btoa(svg);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'img-wrapper';
+        const clone = img.cloneNode();
+        clone.src = placeholderImage;
+        wrapper.appendChild(clone);
+        img.replaceWith(wrapper);
+        }
+    `;
 
 export const ORGANIZATION_SCHEMA = {
   '@context': 'https://schema.org',

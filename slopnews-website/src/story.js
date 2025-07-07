@@ -251,7 +251,7 @@ export const STORY_HTML = `<!DOCTYPE html>
                                 '<span class="date">' + formatDate(story.days_ago) + '</span>' +
                             '</div>' +
                         '</div>' +
-                        (story.image ? '<div class="story-image"><img src="' + story.image + '?width=800&fit=contain" alt="' + story.title + '"></div>' : '') +
+                        (story.image ? '<div class="story-image"><img src="' + story.image + '?width=800&fit=contain" alt="' + story.title + '" onerror="handleImageError(this)"></div>' : '') +
                         '<div class="story-content">' + parseMarkdown(story.content) + '</div>' +
                         '<div class="share-buttons">' +
                             '<a href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(story.title) + '&url=' + encodeURIComponent(window.location.href) + '" target="_blank" rel="noopener noreferrer" class="twitter">Twitter</a>' +

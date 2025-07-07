@@ -180,7 +180,7 @@ export const UI_HTML = `<!DOCTYPE html>
 
                 const storiesHtml = data.stories.map(story =>
                     '<article class="story">' +
-                        (story.image ? '<div class="story-image"><a href="/story/' + story.id + (category ? '?category=' + encodeURIComponent(category) : '') + '"><img src="' + story.image + '?width=120&height=80&fit=cover" alt="' + story.title + '"></a></div>' : '') +
+                        (story.image ? '<div class="story-image"><a href="/story/' + story.id + (category ? '?category=' + encodeURIComponent(category) : '') + '"><img src="' + story.image + '?width=120&height=80&fit=cover" alt="' + story.title + '" onerror="handleImageError(this)"></a></div>' : '') +
                         '<div class="story-content">' +
                             '<span class="category">' + story.category + '</span>' +
                             '<h2><a href="/story/' + story.id + (category ? '?category=' + encodeURIComponent(category) : '') + '" style="color: inherit; text-decoration: none;">' + story.title + '</a></h2>' +

@@ -137,6 +137,13 @@ export const GALLERY_HTML = `<!DOCTYPE html>
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1;
+            padding: 0;
+        }
+        .close-modal::before {
+            content: "×";
+            display: block;
+            transform: translateY(-1px);
         }
         .loading {
             text-align: center;
@@ -168,10 +175,10 @@ export const GALLERY_HTML = `<!DOCTYPE html>
     </div>
     <div id="modal" class="modal">
         <div class="modal-content">
-            <button class="close-modal">&times;</button>
+            <button class="close-modal"></button>
             <button class="modal-nav prev" id="prev-image">←</button>
             <button class="modal-nav next" id="next-image">→</button>
-            <img id="modal-image" class="modal-image" src="" alt="">
+            <img id="modal-image" class="modal-image" src="" alt="" onerror="handleImageError(this)">
             <div id="modal-story" class="modal-story"></div>
         </div>
     </div>
@@ -257,7 +264,8 @@ export const GALLERY_HTML = `<!DOCTYPE html>
             div.innerHTML = \`
                 <img src="\${item.image}?width=600&height=400&fit=cover"
                      alt="\${item.title}"
-                     loading="lazy">
+                     loading="lazy"
+                     onerror="handleImageError(this)">
             \`;
             div.onclick = () => openModal(item);
             gallery.appendChild(div);
@@ -384,13 +392,32 @@ export const GALLERY_HTML = `<!DOCTYPE html>
         }
 
         // Close modal when clicking the close button or outside the modal content
-        document.querySelector('.close-modal').onclick = closeModal;
+        const closeButton = document.querySelector('.close-modal');
+        const modalContent = document.querySelector('.modal-content');
 
-        document.getElementById('modal').onclick = (e) => {
+        // Prevent all touch events on the close button and its parent
+        [closeButton, modalContent].forEach(element => {
+            element.addEventListener('touchstart', (e) => {
+                if (e.target === closeButton) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, { passive: false });
+
+            element.addEventListener('touchend', (e) => {
+                if (e.target === closeButton) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeModal();
+                }
+            }, { passive: false });
+        });
+
+        document.getElementById('modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('modal')) {
                 closeModal();
             }
-        };
+        });
 
         // Add click handlers for navigation buttons
         document.getElementById('prev-image').onclick = showPreviousImage;
