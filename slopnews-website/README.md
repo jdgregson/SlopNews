@@ -12,14 +12,10 @@ To use the MCP server with an AI assistant, create a configuration file with thi
 {
   "mcpServers": {
     "slopnews": {
-      "transport": {
-        "type": "http",
-        "url": "https://slop247.com/mcp",
-        "headers": {
-          "Content-Type": "application/json"
-        }
-      },
-      "description": "SlopNews MCP Server - Access to news stories, categories, and related content"
+      "url": "https://slop247.com/mcp",
+      "headers": {
+        "Content-Type": "application/json"
+      }
     }
   }
 }
