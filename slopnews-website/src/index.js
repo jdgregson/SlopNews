@@ -217,8 +217,14 @@ router.post('/mcp', async (request, env) => {
     // Parse the request body
     const body = await request.json();
 
-    // Handle the MCP request
+    // Debug logging
+    console.log('MCP Request:', JSON.stringify(body, null, 2));
+
+    // The MCP SDK expects the request to be passed directly
     const response = await mcpServer.handleRequest(body);
+
+    // Debug logging
+    console.log('MCP Response:', JSON.stringify(response, null, 2));
 
     return new Response(JSON.stringify(response), {
       headers: {'Content-Type': 'application/json'},

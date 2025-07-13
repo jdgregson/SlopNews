@@ -1,12 +1,47 @@
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+
 export function createMCPServer(env) {
-  // Simple MCP server implementation for Cloudflare Workers
+  // Simple, working MCP server implementation
   const server = {
+    // Track recent requests to prevent loops
+    recentRequests: new Map(),
+
     async handleRequest(request) {
       try {
         const { jsonrpc, id, method, params } = request;
 
         if (jsonrpc !== '2.0') {
           throw new Error('Invalid JSON-RPC version');
+        }
+
+        // Rate limiting for tool calls to prevent loops
+        if (method === 'tools/call') {
+          const { name, arguments: args } = params;
+          const requestKey = `${name}-${JSON.stringify(args)}`;
+          const now = Date.now();
+
+          if (this.recentRequests.has(requestKey)) {
+            const lastCall = this.recentRequests.get(requestKey);
+            if (now - lastCall < 5000) { // 5 second cooldown
+              return {
+                jsonrpc: '2.0',
+                id,
+                error: {
+                  code: -32603,
+                  message: 'Rate limit exceeded. Please wait before making the same request again.',
+                },
+              };
+            }
+          }
+
+          this.recentRequests.set(requestKey, now);
+
+          // Clean up old entries (older than 1 minute)
+          for (const [key, timestamp] of this.recentRequests.entries()) {
+            if (now - timestamp > 60000) {
+              this.recentRequests.delete(key);
+            }
+          }
         }
 
         switch (method) {
@@ -28,7 +63,13 @@ export function createMCPServer(env) {
             };
 
           case 'notifications/initialized':
-            // Acknowledge initialization
+            return {
+              jsonrpc: '2.0',
+              id,
+              result: {},
+            };
+
+          case 'notifications/cancelled':
             return {
               jsonrpc: '2.0',
               id,
@@ -43,19 +84,17 @@ export function createMCPServer(env) {
                 tools: [
                   {
                     name: 'get_news_stories',
-                    description: 'Get news stories with optional filtering',
+                    description: 'Get news stories with optional filtering. Use sparingly to avoid rate limits.',
                     inputSchema: {
                       type: 'object',
                       properties: {
                         limit: {
                           type: 'number',
-                          description: 'Number of stories to return (default: 10)',
-                          default: 10,
+                          description: 'Number of stories to return (default: 10, max: 20)',
                         },
                         offset: {
                           type: 'number',
                           description: 'Number of stories to skip (default: 0)',
-                          default: 0,
                         },
                         category: {
                           type: 'string',
@@ -64,7 +103,6 @@ export function createMCPServer(env) {
                         snippet: {
                           type: 'boolean',
                           description: 'Return truncated content (default: false)',
-                          default: false,
                         },
                       },
                     },
@@ -104,7 +142,6 @@ export function createMCPServer(env) {
                         limit: {
                           type: 'number',
                           description: 'Number of related stories to return (default: 3)',
-                          default: 3,
                         },
                       },
                       required: ['id'],
@@ -119,12 +156,10 @@ export function createMCPServer(env) {
                         page: {
                           type: 'number',
                           description: 'Page number (default: 1)',
-                          default: 1,
                         },
                         limit: {
                           type: 'number',
                           description: 'Number of images per page (default: 20)',
-                          default: 20,
                         },
                       },
                     },
@@ -221,6 +256,10 @@ async function handleToolCall(name, args, env) {
   switch (name) {
     case 'get_news_stories':
       const { limit = 10, offset = 0, category, snippet = false } = args;
+
+      // Enforce maximum limit to prevent abuse
+      const actualLimit = Math.min(limit, 20);
+
       let query = 'SELECT * FROM stories';
       const queryParams = [];
 
@@ -230,7 +269,7 @@ async function handleToolCall(name, args, env) {
       }
 
       query += ' ORDER BY id DESC LIMIT ? OFFSET ?';
-      queryParams.push(limit, offset);
+      queryParams.push(actualLimit, offset);
 
       const stories = await env.DB.prepare(query)
         .bind(...queryParams)
@@ -305,7 +344,6 @@ async function handleToolCall(name, args, env) {
 }
 
 async function handleResourceRead(uri, env) {
-  // Get all news stories
   if (uri.startsWith('slopnews://stories')) {
     const url = new URL(`http://localhost${uri.replace('slopnews://', '/')}`);
     const limit = parseInt(url.searchParams.get('limit')) || 10;
@@ -348,7 +386,6 @@ async function handleResourceRead(uri, env) {
     ];
   }
 
-  // Get a single story by ID
   if (uri.startsWith('slopnews://story/')) {
     const id = uri.replace('slopnews://story/', '');
     const story = await env.DB.prepare('SELECT * FROM stories WHERE id = ?')
@@ -367,7 +404,6 @@ async function handleResourceRead(uri, env) {
     ];
   }
 
-  // Get categories
   if (uri === 'slopnews://categories') {
     const result = await env.DB.prepare(
       'SELECT category FROM stories GROUP BY category ORDER BY category'
@@ -383,7 +419,6 @@ async function handleResourceRead(uri, env) {
     ];
   }
 
-  // Get related stories
   if (uri.startsWith('slopnews://related/')) {
     const id = uri.replace('slopnews://related/', '');
     const limit = 3;
@@ -412,7 +447,6 @@ async function handleResourceRead(uri, env) {
     ];
   }
 
-  // Get gallery images
   if (uri.startsWith('slopnews://gallery')) {
     const url = new URL(`http://localhost${uri.replace('slopnews://', '/')}`);
     const page = parseInt(url.searchParams.get('page')) || 1;
