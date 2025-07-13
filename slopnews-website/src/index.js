@@ -3,6 +3,7 @@ import {UI_HTML} from './ui';
 import {STORY_HTML} from './story';
 import {DISCLAIMER_HTML} from './disclaimer';
 import {GALLERY_HTML} from './gallery';
+import {createMCPServer} from './mcp-server';
 
 const router = Router();
 
@@ -204,6 +205,29 @@ router.get('/api/gallery', async (request, env) => {
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
+    });
+  }
+});
+
+// MCP server endpoint
+router.post('/mcp', async (request, env) => {
+  try {
+    const mcpServer = createMCPServer(env);
+
+    // Parse the request body
+    const body = await request.json();
+
+    // Handle the MCP request
+    const response = await mcpServer.handleRequest(body);
+
+    return new Response(JSON.stringify(response), {
+      headers: {'Content-Type': 'application/json'},
+    });
+  } catch (error) {
+    console.error('MCP server error:', error);
+    return new Response(JSON.stringify({error: 'MCP server error', details: error.message}), {
+      status: 500,
+      headers: {'Content-Type': 'application/json'},
     });
   }
 });

@@ -8,9 +8,10 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.15.1",
     "itty-router": "^4.2.2"
   },
   "devDependencies": {
-    "wrangler": "^3.0.0"
+    "wrangler": "^4.24.3"
   }
 }
