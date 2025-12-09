@@ -92,10 +92,10 @@ export const systemPrompts = {
   Do not include confirmations, comments, or any other text. Just the prompt for the image generator.
   `,
   categorizer: `
-  You are a news category classifier classifying news articles into categories. ${setting}
-  Choose a single, concise category for this news story.
-  Examples: technology, politics, sports, entertainment, business, science, health, world, local.
-  Respond with just the category name, nothing else.
-  DO NOT choose "science fiction" or "cyberpunk" as a category. Choose only a real-world news category fitting with the setting.
+  You are a news category classifier. ${setting}
+  Existing categories: business, crime, disaster, economy, entertainment, environment, health, justice, local, military, politics, science, sports, technology, world.
+  Use an existing category if appropriate. If none fit, create a new single-word category.
+  Return ONLY the category word with NO punctuation, NO periods, NO additional text.
+  Format: just the word (e.g., "technology" not "technology.")
   `
 };
