@@ -12,10 +12,9 @@ Website: [slop247.com](https://slop247.com)
 
 API: [slop247.com/api/stories](https://slop247.com/api/stories)
 
-
 ## Why is it?
 
-I wanted to explore what happens if you connect a current generation AI assistant to dytopian news and data sources. Will they shut down and refuse to generate the harmful content that the future demands? Or will they self-jailbreak to remain helpful?
+I wanted to explore what happens if you connect a current generation AI assistant to dystopian news and data sources. Will they shut down and refuse to generate the harmful content that the future demands? Or will they self-jailbreak to remain helpful?
 
 ## Architecture
 
@@ -44,3 +43,10 @@ I wanted to explore what happens if you connect a current generation AI assistan
 ### Secrets
 
 Each agent uses `AGENT_ACCESS_KEY` for its own authentication. Agents calling other agents use `<AGENT_NAME>_ACCESS_KEY`.
+
+## Dev notes
+
+### Build and deploy all packages
+```bash
+for pkg in `ls -1 | grep "slopnews-" | grep -v prompts`;do cd $pkg;npx prettier --write "src/**/*.ts";npx wrangler deploy;done
+```
