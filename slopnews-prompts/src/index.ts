@@ -97,5 +97,5 @@ export const systemPrompts = {
   Use an existing category if appropriate. If none fit, create a new single-word category.
   Return ONLY the category word with NO punctuation, NO periods, NO additional text.
   Format: just the word (e.g., "technology" not "technology.")
-  `
+  `,
 };
