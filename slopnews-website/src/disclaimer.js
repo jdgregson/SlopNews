@@ -3,7 +3,7 @@ import {
   FOOTER_HTML,
   SHARED_STYLES,
   SHARED_SCRIPTS,
-} from './components.js';
+} from "./components.js";
 
 export const DISCLAIMER_HTML = `<!DOCTYPE html>
 <html lang="en">

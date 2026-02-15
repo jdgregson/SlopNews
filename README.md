@@ -48,5 +48,5 @@ Each agent uses `AGENT_ACCESS_KEY` for its own authentication. Agents calling ot
 
 ### Build and deploy all packages
 ```bash
-for pkg in `ls -1 | grep "slopnews-" | grep -v prompts`;do cd $pkg;npx prettier --write "src/**/*.ts";npx wrangler deploy;done
+for pkg in `ls -1 | grep "slopnews-" | grep -v prompts`;do cd $pkg;npx prettier --write "src/**/*.{ts,js}";npx wrangler deploy;cd ..;done
 ```

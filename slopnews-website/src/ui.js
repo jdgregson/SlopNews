@@ -4,7 +4,7 @@ import {
   SHARED_STYLES,
   SHARED_SCRIPTS,
   ORGANIZATION_SCHEMA,
-} from './components.js';
+} from "./components.js";
 
 export const UI_HTML = `<!DOCTYPE html>
 <html lang="en">
@@ -178,22 +178,64 @@ export const UI_HTML = `<!DOCTYPE html>
                 const response = await fetch(url);
                 const data = await response.json();
 
-                const storiesHtml = data.stories.map(story =>
-                    '<article class="story">' +
-                        (story.image ? '<div class="story-image"><a href="/story/' + story.id + (category ? '?category=' + encodeURIComponent(category) : '') + '"><img src="' + story.image + '?width=120&height=80&fit=cover" alt="' + story.title + '" onerror="handleImageError(this)"></a></div>' : '') +
-                        '<div class="story-content">' +
-                            '<span class="category">' + story.category + '</span>' +
-                            '<h2><a href="/story/' + story.id + (category ? '?category=' + encodeURIComponent(category) : '') + '" style="color: inherit; text-decoration: none;">' + story.title + '</a></h2>' +
-                            '<p>' + parseMarkdown(story.content) + '</p>' +
-                            '<div class="story-meta">' +
-                                '<span class="source">' + story.source + '</span>' +
-                                '<span class="date">' + formatDate(story.days_ago) + '</span>' +
-                            '</div>' +
-                        '</div>' +
-                    '</article>'
-                ).join('');
-
-                document.getElementById('stories').innerHTML = storiesHtml;
+                const storiesContainer = document.getElementById('stories');
+                storiesContainer.innerHTML = '';
+                
+                data.stories.forEach(story => {
+                    const article = document.createElement('article');
+                    article.className = 'story';
+                    
+                    if (story.image) {
+                        const imageDiv = document.createElement('div');
+                        imageDiv.className = 'story-image';
+                        const imageLink = document.createElement('a');
+                        imageLink.href = '/story/' + story.id + (category ? '?category=' + encodeURIComponent(category) : '');
+                        const img = document.createElement('img');
+                        img.src = story.image + '?width=120&height=80&fit=cover';
+                        img.alt = story.title;
+                        img.onerror = function() { handleImageError(this); };
+                        imageLink.appendChild(img);
+                        imageDiv.appendChild(imageLink);
+                        article.appendChild(imageDiv);
+                    }
+                    
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'story-content';
+                    
+                    const categorySpan = document.createElement('span');
+                    categorySpan.className = 'category';
+                    categorySpan.innerText = story.category;
+                    contentDiv.appendChild(categorySpan);
+                    
+                    const h2 = document.createElement('h2');
+                    const titleLink = document.createElement('a');
+                    titleLink.href = '/story/' + story.id + (category ? '?category=' + encodeURIComponent(category) : '');
+                    titleLink.style.color = 'inherit';
+                    titleLink.style.textDecoration = 'none';
+                    titleLink.innerText = story.title;
+                    h2.appendChild(titleLink);
+                    contentDiv.appendChild(h2);
+                    
+                    const p = document.createElement('p');
+                    p.textContent = story.content;
+                    p.style.whiteSpace = 'pre-wrap';
+                    contentDiv.appendChild(p);
+                    
+                    const metaDiv = document.createElement('div');
+                    metaDiv.className = 'story-meta';
+                    const sourceSpan = document.createElement('span');
+                    sourceSpan.className = 'source';
+                    sourceSpan.innerText = story.source;
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'date';
+                    dateSpan.innerText = formatDate(story.days_ago);
+                    metaDiv.appendChild(sourceSpan);
+                    metaDiv.appendChild(dateSpan);
+                    contentDiv.appendChild(metaDiv);
+                    
+                    article.appendChild(contentDiv);
+                    storiesContainer.appendChild(article);
+                });
 
                 // Update pagination
                 const totalPages = Math.ceil(data.total / pageSize);

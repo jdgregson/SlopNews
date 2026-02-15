@@ -471,11 +471,11 @@ export const SHARED_SCRIPTS = `
     `;
 
 export const ORGANIZATION_SCHEMA = {
-  '@context': 'https://schema.org',
-  '@type': 'NewsMediaOrganization',
-  name: 'SLOP News 24/7',
-  url: 'https://slop247.com',
-  logo: 'https://slop247.com/logo.png',
+  "@context": "https://schema.org",
+  "@type": "NewsMediaOrganization",
+  name: "SLOP News 24/7",
+  url: "https://slop247.com",
+  logo: "https://slop247.com/logo.png",
   description:
-    'Southern Louisiana Operationalized Partition - Your trusted source for news and analysis to get you through the hour.',
+    "Southern Louisiana Operationalized Partition - Your trusted source for news and analysis to get you through the hour.",
 };

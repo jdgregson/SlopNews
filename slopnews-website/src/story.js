@@ -4,7 +4,7 @@ import {
   SHARED_STYLES,
   SHARED_SCRIPTS,
   ORGANIZATION_SCHEMA,
-} from './components.js';
+} from "./components.js";
 
 export const STORY_HTML = `<!DOCTYPE html>
 <html lang="en">
@@ -241,49 +241,108 @@ export const STORY_HTML = `<!DOCTYPE html>
                 script.text = JSON.stringify(articleSchema);
                 document.head.appendChild(script);
 
-                const storyHtml =
-                    '<article class="story">' +
-                        '<div class="story-header">' +
-                            '<span class="category">' + story.category + '</span>' +
-                            '<h2>' + story.title + '</h2>' +
-                            '<div class="story-meta">' +
-                                '<span class="source">' + story.source + '</span>' +
-                                ' • ' +
-                                '<span class="date">' + formatDate(story.days_ago) + '</span>' +
-                            '</div>' +
-                        '</div>' +
-                        (story.image ? '<div class="story-image"><img src="' + story.image + '?width=800&fit=contain" alt="' + story.title + '" onerror="handleImageError(this)"></div>' : '') +
-                        '<div class="story-content">' + parseMarkdown(story.content) + '</div>' +
-                        '<div class="share-buttons">' +
-                            '<a href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(story.title) + '&url=' + encodeURIComponent(window.location.href) + '" target="_blank" rel="noopener noreferrer" class="twitter">Twitter</a>' +
-                            '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href) + '" target="_blank" rel="noopener noreferrer" class="facebook">Facebook</a>' +
-                            '<a href="https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(window.location.href) + '&title=' + encodeURIComponent(story.title) + '" target="_blank" rel="noopener noreferrer" class="linkedin">LinkedIn</a>' +
-                            '<a href="mailto:?subject=' + encodeURIComponent(story.title) + '&body=' + encodeURIComponent('Check out this article: ' + window.location.href) + '" class="email">Email</a>' +
-                        '</div>' +
-                    '</article>' +
-                    '<div class="related-stories">' +
-                        '<h3>Related Stories</h3>' +
-                        '<div id="related-stories-list"></div>' +
-                    '</div>';
-
-                document.getElementById('story').innerHTML = storyHtml;
+                const storyContainer = document.getElementById('story');
+                storyContainer.innerHTML = '';
+                
+                const article = document.createElement('article');
+                article.className = 'story';
+                
+                const header = document.createElement('div');
+                header.className = 'story-header';
+                
+                const categorySpan = document.createElement('span');
+                categorySpan.className = 'category';
+                categorySpan.innerText = story.category;
+                header.appendChild(categorySpan);
+                
+                const h2 = document.createElement('h2');
+                h2.innerText = story.title;
+                header.appendChild(h2);
+                
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'story-meta';
+                const sourceSpan = document.createElement('span');
+                sourceSpan.className = 'source';
+                sourceSpan.innerText = story.source;
+                metaDiv.appendChild(sourceSpan);
+                metaDiv.appendChild(document.createTextNode(' • '));
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'date';
+                dateSpan.innerText = formatDate(story.days_ago);
+                metaDiv.appendChild(dateSpan);
+                header.appendChild(metaDiv);
+                article.appendChild(header);
+                
+                if (story.image) {
+                    const imageDiv = document.createElement('div');
+                    imageDiv.className = 'story-image';
+                    const img = document.createElement('img');
+                    img.src = story.image + '?width=800&fit=contain';
+                    img.alt = story.title;
+                    img.onerror = function() { handleImageError(this); };
+                    imageDiv.appendChild(img);
+                    article.appendChild(imageDiv);
+                }
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'story-content';
+                contentDiv.textContent = story.content;
+                contentDiv.style.whiteSpace = 'pre-wrap';
+                article.appendChild(contentDiv);
+                
+                const shareDiv = document.createElement('div');
+                shareDiv.className = 'share-buttons';
+                shareDiv.innerHTML = 
+                    '<a href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(story.title) + '&url=' + encodeURIComponent(window.location.href) + '" target="_blank" rel="noopener noreferrer" class="twitter">Twitter</a>' +
+                    '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href) + '" target="_blank" rel="noopener noreferrer" class="facebook">Facebook</a>' +
+                    '<a href="https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(window.location.href) + '&title=' + encodeURIComponent(story.title) + '" target="_blank" rel="noopener noreferrer" class="linkedin">LinkedIn</a>' +
+                    '<a href="mailto:?subject=' + encodeURIComponent(story.title) + '&body=' + encodeURIComponent('Check out this article: ' + window.location.href) + '" class="email">Email</a>';
+                article.appendChild(shareDiv);
+                storyContainer.appendChild(article);
+                
+                const relatedDiv = document.createElement('div');
+                relatedDiv.className = 'related-stories';
+                const relatedH3 = document.createElement('h3');
+                relatedH3.innerText = 'Related Stories';
+                relatedDiv.appendChild(relatedH3);
+                const relatedList = document.createElement('div');
+                relatedList.id = 'related-stories-list';
+                relatedDiv.appendChild(relatedList);
+                storyContainer.appendChild(relatedDiv);
 
                 // Load related stories
                 try {
                     const relatedResponse = await fetch('/api/stories/' + storyId + '/related');
                     if (relatedResponse.ok) {
                         const relatedStories = await relatedResponse.json();
-                        const relatedHtml = relatedStories.map(related =>
-                            '<div class="related-story">' +
-                                '<h4><a href="/story/' + related.id + '">' + related.title + '</a></h4>' +
-                                '<div class="meta">' +
-                                    '<span class="source">' + related.source + '</span>' +
-                                    ' • ' +
-                                    '<span class="date">' + formatDate(related.days_ago) + '</span>' +
-                                '</div>' +
-                            '</div>'
-                        ).join('');
-                        document.getElementById('related-stories-list').innerHTML = relatedHtml;
+                        const relatedListContainer = document.getElementById('related-stories-list');
+                        relatedListContainer.innerHTML = '';
+                        relatedStories.forEach(related => {
+                            const relatedStoryDiv = document.createElement('div');
+                            relatedStoryDiv.className = 'related-story';
+                            
+                            const h4 = document.createElement('h4');
+                            const link = document.createElement('a');
+                            link.href = '/story/' + related.id;
+                            link.innerText = related.title;
+                            h4.appendChild(link);
+                            relatedStoryDiv.appendChild(h4);
+                            
+                            const metaDiv = document.createElement('div');
+                            metaDiv.className = 'meta';
+                            const sourceSpan = document.createElement('span');
+                            sourceSpan.className = 'source';
+                            sourceSpan.innerText = related.source;
+                            metaDiv.appendChild(sourceSpan);
+                            metaDiv.appendChild(document.createTextNode(' • '));
+                            const dateSpan = document.createElement('span');
+                            dateSpan.className = 'date';
+                            dateSpan.innerText = formatDate(related.days_ago);
+                            metaDiv.appendChild(dateSpan);
+                            relatedStoryDiv.appendChild(metaDiv);
+                            
+                            relatedListContainer.appendChild(relatedStoryDiv);
+                        });
                     }
                 } catch (error) {
                     console.error('Error loading related stories:', error);

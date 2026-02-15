@@ -3,7 +3,7 @@ import {
   FOOTER_HTML,
   SHARED_STYLES,
   SHARED_SCRIPTS,
-} from './components.js';
+} from "./components.js";
 
 export const GALLERY_HTML = `<!DOCTYPE html>
 <html lang="en">
@@ -260,13 +260,12 @@ export const GALLERY_HTML = `<!DOCTYPE html>
             const div = document.createElement('div');
             div.className = 'gallery-item';
 
-            // Create and append the image directly
-            div.innerHTML = \`
-                <img src="\${item.image}?width=600&height=400&fit=cover"
-                     alt="\${item.title}"
-                     loading="lazy"
-                     onerror="handleImageError(this)">
-            \`;
+            const img = document.createElement('img');
+            img.src = item.image + '?width=600&height=400&fit=cover';
+            img.alt = item.title;
+            img.loading = 'lazy';
+            img.onerror = function() { handleImageError(this); };
+            div.appendChild(img);
             div.onclick = () => openModal(item);
             gallery.appendChild(div);
 
@@ -283,11 +282,26 @@ export const GALLERY_HTML = `<!DOCTYPE html>
             modalImage.src = item.image;
             modalImage.alt = item.title;
 
-            modalStory.innerHTML = \`
-                <h3><a href="/story/\${item.id}" target="_blank" style="color: inherit; text-decoration: none;">\${item.title}</a></h3>
-                <p>\${item.content.substring(0, 200)}...</p>
-                <a href="/story/\${item.id}" target="_blank">Read full story</a>
-            \`;
+            modalStory.innerHTML = '';
+            const h3 = document.createElement('h3');
+            const link = document.createElement('a');
+            link.href = '/story/' + item.id;
+            link.target = '_blank';
+            link.style.color = 'inherit';
+            link.style.textDecoration = 'none';
+            link.innerText = item.title;
+            h3.appendChild(link);
+            modalStory.appendChild(h3);
+            
+            const p = document.createElement('p');
+            p.innerText = item.content.substring(0, 200) + '...';
+            modalStory.appendChild(p);
+            
+            const readLink = document.createElement('a');
+            readLink.href = '/story/' + item.id;
+            readLink.target = '_blank';
+            readLink.innerText = 'Read full story';
+            modalStory.appendChild(readLink);
 
             modal.style.display = 'block';
             document.body.style.overflow = 'hidden';
@@ -374,11 +388,26 @@ export const GALLERY_HTML = `<!DOCTYPE html>
             modalImage.src = item.image;
             modalImage.alt = item.title;
 
-            modalStory.innerHTML = \`
-                <h3><a href="/story/\${item.id}" target="_blank" style="color: inherit; text-decoration: none;">\${item.title}</a></h3>
-                <p>\${item.content.substring(0, 200)}...</p>
-                <a href="/story/\${item.id}" target="_blank">Read full story</a>
-            \`;
+            modalStory.innerHTML = '';
+            const h3 = document.createElement('h3');
+            const link = document.createElement('a');
+            link.href = '/story/' + item.id;
+            link.target = '_blank';
+            link.style.color = 'inherit';
+            link.style.textDecoration = 'none';
+            link.innerText = item.title;
+            h3.appendChild(link);
+            modalStory.appendChild(h3);
+            
+            const p = document.createElement('p');
+            p.innerText = item.content.substring(0, 200) + '...';
+            modalStory.appendChild(p);
+            
+            const readLink = document.createElement('a');
+            readLink.href = '/story/' + item.id;
+            readLink.target = '_blank';
+            readLink.innerText = 'Read full story';
+            modalStory.appendChild(readLink);
         }
 
         function closeModal() {
