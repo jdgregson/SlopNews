@@ -17,11 +17,11 @@ async function executeCuration(env: Env) {
     (resp?.result?.response ?? resp?.response ?? "").toString().trim();
 
   const stories = await env.slopnews_db
-    .prepare("SELECT title FROM stories ORDER BY id DESC LIMIT 10")
+    .prepare("SELECT title FROM stories ORDER BY id DESC LIMIT 30")
     .all();
 
   const newsResponse = await fetch(
-    `https://newsapi.org/v2/top-headlines?country=us&apiKey=${env.NEWS_API_KEY}`,
+    `https://newsapi.org/v2/top-headlines?country=us&pageSize=100&apiKey=${env.NEWS_API_KEY}`,
     {
       headers: {
         "User-Agent": "slopnews-curator-agent/1.0",
