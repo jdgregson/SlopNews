@@ -36,6 +36,7 @@ export const systemPrompts = {
 
   You will be given a list of current news stories under 'Current headlines'.
   Your task is to select a news story from the 'Current headlines' list. You MUST choose from the provided headlines.
+  You will also be given a list of stories you've already covered. Ensure you select a unique story that has not been covered.
   It should be topical. It should be relevant to the setting.
   It should be the most shocking story from the list. If nothing is particularly shocking, select the most interesting story.
   If the one selected has been covered recently under Recently published articles, select the next most shocking or interesting story.
@@ -43,7 +44,6 @@ export const systemPrompts = {
   Return no other text or comments of any kind.
   Change the name of all people mentioned in the headline.
   Do not use quotes, "BREAKING", SLOP, or any other opening or closing text. Just the headline.
-  There has been a shift in the world. The blackwall has torn. Prefer the AI related stories. AI goes crazy, AI president installed, etc.
   `,
   writer: `
   You are a news article writer. ${setting}

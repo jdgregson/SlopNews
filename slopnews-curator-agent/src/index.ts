@@ -29,6 +29,7 @@ async function executeCuration(env: Env) {
     },
   );
   const data: any = await newsResponse.json();
+  console.log(`Fetched headlines: ${JSON.stringify(data)}`)
 
   let newsTitles: string[] = [];
   if (data && Array.isArray(data.articles)) {
@@ -38,6 +39,7 @@ async function executeCuration(env: Env) {
   const headlines = newsTitles.join("\n - ");
   const recentStories =
     stories.results?.map((s: any) => s.title).join("\n - ") || "None";
+  console.log(`Recent headlines: ${JSON.stringify(recentStories)}`)
   const formattedPrompt = `Current headlines:\n${headlines}\n\nRecent stories already published:\n${recentStories}`;
 
   const headlineResponse = await env.AI.run(HEADLINE_MODEL as any, {
